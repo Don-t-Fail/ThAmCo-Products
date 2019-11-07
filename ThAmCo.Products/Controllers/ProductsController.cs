@@ -19,9 +19,26 @@ namespace ThAmCo.Products.Controllers
         }
 
         // GET: Products
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(int BrandId = 0, int CategoryId = 0, double PriceLow = 0, double PriceHigh = 0)
         {
-            return View(await _context.Products.ToListAsync());
+            var products = await _context.Products.Where(p => p.Active).ToListAsync();
+            if (BrandId != 0)
+            {
+                products = products.Where(p => p.BrandId == BrandId).ToList();
+            }
+            if (CategoryId != 0)
+            {
+                products = products.Where(p => p.BrandId == CategoryId).ToList();
+            }
+            if (PriceLow != 0)
+            {
+                //TODO
+            }
+            if (PriceHigh != 0)
+            {
+                //TODO
+            }
+            return View(products);
         }
 
         // GET: Products/Details/5
