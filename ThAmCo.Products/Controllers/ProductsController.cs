@@ -139,7 +139,8 @@ namespace ThAmCo.Products.Controllers
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
             var product = await _context.Products.FindAsync(id);
-            _context.Products.Remove(product);
+            product.Active = false;
+            _context.Products.Update(product);
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
