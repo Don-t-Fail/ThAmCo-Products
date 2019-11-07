@@ -28,7 +28,7 @@ namespace ThAmCo.Products.Controllers
             }
             if (CategoryId != 0)
             {
-                products = products.Where(p => p.BrandId == CategoryId).ToList();
+                products = products.Where(p => p.CategoryId == CategoryId).ToList();
             }
             if (PriceLow != 0)
             {
