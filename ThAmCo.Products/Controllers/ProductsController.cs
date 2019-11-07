@@ -21,7 +21,7 @@ namespace ThAmCo.Products.Controllers
         // GET: Products
         public async Task<IActionResult> Index(int BrandId = 0, int CategoryId = 0, double PriceLow = 0, double PriceHigh = 0)
         {
-            var products = await _context.Products.Where(p => p.Active).ToListAsync();
+            var products = await _context.Products.Where(p => p.Active).Include(p => p.Category).Include(p => p.Brand).ToListAsync();
             if (BrandId != 0)
             {
                 products = products.Where(p => p.BrandId == BrandId).ToList();
