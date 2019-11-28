@@ -47,6 +47,9 @@ namespace ThAmCo.Products.Controllers
                 CategoryId = CategoryId
             };
 
+            ViewData["BrandList"] = new SelectList(_context.Brands, "Id", "Name");
+            ViewData["CategoryList"] = new SelectList(_context.Category, "Id", "Name");
+
             return View(productIndex);
         }
 
