@@ -16,6 +16,14 @@
         <select asp-for="CategoryId" class="form-control" asp-items="ViewBag.CategoryList"></select>
     </div>
     <div class="form-group">
+        <label>Lowest Price</label>
+        <input type="number" min="0" step="0.01" asp-for="PriceLow" class="form-control" />
+    </div>
+    <div class="form-group">
+        <label>Highest Price</label>
+        <input type="number" min="0" step="0.01" asp-for="PriceHigh" class="form-control" />
+    </div>
+    <div class="form-group">
         <input type="submit" value="Search" class="btn btn-default" />
     </div>
 </form>
