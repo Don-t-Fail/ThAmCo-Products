@@ -1,4 +1,4 @@
-﻿@model IEnumerable<ThAmCo.Products.Data.Product>
+﻿@model ThAmCo.Products.Models.ViewModels.ProductsIndexModel
 
 @{
     ViewData["Title"] = "Index";
@@ -7,12 +7,12 @@
 <h1>Index</h1>
 
 <form method="get">
-    <select name="brandid">
+    <select name="brandid" value="@Model.BrandId">
         <option value="1">Brand 1</option>
         <option value="2">Brand 2</option>
         <option value="3">Brand 3</option>
     </select>
-    <select name="categoryid">
+    <select name="categoryid" value="@Model.CategoryId">
         <option value="1">Category 1</option>
         <option value="2">Category 2</option>
         <option value="3">Category 3</option>
@@ -24,22 +24,22 @@
     <thead>
         <tr>
             <th>
-                @Html.DisplayNameFor(model => model.Name)
+                @Html.DisplayNameFor(model => model.Products.FirstOrDefault().Name)
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.Description)
+                @Html.DisplayNameFor(model => model.Products.FirstOrDefault().Description)
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.Brand)
+                @Html.DisplayNameFor(model => model.Products.FirstOrDefault().Brand)
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.Category)
+                @Html.DisplayNameFor(model => model.Products.FirstOrDefault().Category)
             </th>
             <th></th>
         </tr>
     </thead>
     <tbody>
-@foreach (var item in Model) {
+@foreach (var item in Model.Products) {
         <tr>
             <td>
                 @Html.DisplayFor(modelItem => item.Name)

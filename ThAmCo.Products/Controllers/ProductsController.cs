@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using ThAmCo.Products.Data;
+using ThAmCo.Products.Models.ViewModels;
 
 namespace ThAmCo.Products.Controllers
 {
@@ -38,7 +39,15 @@ namespace ThAmCo.Products.Controllers
             {
                 //TODO
             }
-            return View(products);
+
+            var productIndex = new ProductsIndexModel
+            {
+                Products = products,
+                BrandId = BrandId,
+                CategoryId = CategoryId
+            };
+
+            return View(productIndex);
         }
 
         // GET: Products/Details/5
