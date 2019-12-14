@@ -20,18 +20,24 @@ namespace ThAmCo.Products.Controllers
         }
 
         // GET: Products
-        public async Task<IActionResult> Index(double? PriceLow, double? PriceHigh, int BrandId = 0, int CategoryId = 0)
+        public async Task<IActionResult> Index(double? PriceLow, double? PriceHigh, string Name, string Description, int BrandId = 0, int CategoryId = 0)
         {
             var products = await _context.Products.Where(p => p.Active).Include(p => p.Category).Include(p => p.Brand).ToListAsync();
             
             if (BrandId != 0)
                 products = products.Where(p => p.BrandId == BrandId).ToList();
-            
             if (CategoryId != 0)
                 products = products.Where(p => p.CategoryId == CategoryId).ToList();
 
+            if (Name != null)
+                products = products.Where(p => p.Name.Contains(Name)).ToList();
+            if (Description != null)
+                products = products.Where(p => p.Description.Contains(Description)).ToList();
+
             var productIndex = new ProductsIndexModel
             {
+                Name = Name ?? "",
+                Description = Description ?? "",
                 Products = products,
                 BrandId = BrandId,
                 CategoryId = CategoryId
