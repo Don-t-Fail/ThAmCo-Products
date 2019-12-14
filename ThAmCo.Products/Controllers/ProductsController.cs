@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using ThAmCo.Products.Data;
+using ThAmCo.Products.Models.ViewModels;
 
 namespace ThAmCo.Products.Controllers
 {
@@ -19,25 +20,39 @@ namespace ThAmCo.Products.Controllers
         }
 
         // GET: Products
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(double? PriceLow, double? PriceHigh, int BrandId = 0, int CategoryId = 0)
         {
-            return View(await _context.Products.ToListAsync());
+            var products = await _context.Products.Where(p => p.Active).Include(p => p.Category).Include(p => p.Brand).ToListAsync();
+            
+            if (BrandId != 0)
+                products = products.Where(p => p.BrandId == BrandId).ToList();
+            
+            if (CategoryId != 0)
+                products = products.Where(p => p.CategoryId == CategoryId).ToList();
+
+            var productIndex = new ProductsIndexModel
+            {
+                Products = products,
+                BrandId = BrandId,
+                CategoryId = CategoryId
+            };
+
+            ViewData["BrandList"] = new SelectList(_context.Brands, "Id", "Name");
+            ViewData["CategoryList"] = new SelectList(_context.Category, "Id", "Name");
+
+            return View(productIndex);
         }
 
         // GET: Products/Details/5
         public async Task<IActionResult> Details(int? id)
         {
             if (id == null)
-            {
                 return NotFound();
-            }
 
-            var product = await _context.Products
-                .FirstOrDefaultAsync(m => m.Id == id);
+            var product = await _context.Products.FirstOrDefaultAsync(m => m.Id == id);
+
             if (product == null)
-            {
                 return NotFound();
-            }
 
             return View(product);
         }
@@ -68,15 +83,13 @@ namespace ThAmCo.Products.Controllers
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
-            {
                 return NotFound();
-            }
 
             var product = await _context.Products.FindAsync(id);
+
             if (product == null)
-            {
                 return NotFound();
-            }
+
             return View(product);
         }
 
@@ -88,9 +101,7 @@ namespace ThAmCo.Products.Controllers
         public async Task<IActionResult> Edit(int id, [Bind("Id,Name,Description,Active")] Product product)
         {
             if (id != product.Id)
-            {
                 return NotFound();
-            }
 
             if (ModelState.IsValid)
             {
@@ -102,13 +113,9 @@ namespace ThAmCo.Products.Controllers
                 catch (DbUpdateConcurrencyException)
                 {
                     if (!ProductExists(product.Id))
-                    {
                         return NotFound();
-                    }
                     else
-                    {
                         throw;
-                    }
                 }
                 return RedirectToAction(nameof(Index));
             }
@@ -119,16 +126,12 @@ namespace ThAmCo.Products.Controllers
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null)
-            {
                 return NotFound();
-            }
 
-            var product = await _context.Products
-                .FirstOrDefaultAsync(m => m.Id == id);
+            var product = await _context.Products.FirstOrDefaultAsync(m => m.Id == id);
+
             if (product == null)
-            {
                 return NotFound();
-            }
 
             return View(product);
         }
