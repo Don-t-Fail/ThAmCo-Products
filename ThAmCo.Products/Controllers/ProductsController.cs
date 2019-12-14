@@ -20,25 +20,15 @@ namespace ThAmCo.Products.Controllers
         }
 
         // GET: Products
-        public async Task<IActionResult> Index(int BrandId = 0, int CategoryId = 0, double PriceLow = 0, double PriceHigh = 0)
+        public async Task<IActionResult> Index(double? PriceLow, double? PriceHigh, int BrandId = 0, int CategoryId = 0)
         {
             var products = await _context.Products.Where(p => p.Active).Include(p => p.Category).Include(p => p.Brand).ToListAsync();
+            
             if (BrandId != 0)
-            {
                 products = products.Where(p => p.BrandId == BrandId).ToList();
-            }
+            
             if (CategoryId != 0)
-            {
                 products = products.Where(p => p.CategoryId == CategoryId).ToList();
-            }
-            if (PriceLow != 0)
-            {
-                //TODO
-            }
-            if (PriceHigh != 0)
-            {
-                //TODO
-            }
 
             var productIndex = new ProductsIndexModel
             {
@@ -57,16 +47,12 @@ namespace ThAmCo.Products.Controllers
         public async Task<IActionResult> Details(int? id)
         {
             if (id == null)
-            {
                 return NotFound();
-            }
 
-            var product = await _context.Products
-                .FirstOrDefaultAsync(m => m.Id == id);
+            var product = await _context.Products.FirstOrDefaultAsync(m => m.Id == id);
+
             if (product == null)
-            {
                 return NotFound();
-            }
 
             return View(product);
         }
@@ -97,15 +83,13 @@ namespace ThAmCo.Products.Controllers
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
-            {
                 return NotFound();
-            }
 
             var product = await _context.Products.FindAsync(id);
+
             if (product == null)
-            {
                 return NotFound();
-            }
+
             return View(product);
         }
 
@@ -117,9 +101,7 @@ namespace ThAmCo.Products.Controllers
         public async Task<IActionResult> Edit(int id, [Bind("Id,Name,Description,Active")] Product product)
         {
             if (id != product.Id)
-            {
                 return NotFound();
-            }
 
             if (ModelState.IsValid)
             {
@@ -131,13 +113,9 @@ namespace ThAmCo.Products.Controllers
                 catch (DbUpdateConcurrencyException)
                 {
                     if (!ProductExists(product.Id))
-                    {
                         return NotFound();
-                    }
                     else
-                    {
                         throw;
-                    }
                 }
                 return RedirectToAction(nameof(Index));
             }
@@ -148,16 +126,12 @@ namespace ThAmCo.Products.Controllers
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null)
-            {
                 return NotFound();
-            }
 
-            var product = await _context.Products
-                .FirstOrDefaultAsync(m => m.Id == id);
+            var product = await _context.Products.FirstOrDefaultAsync(m => m.Id == id);
+
             if (product == null)
-            {
                 return NotFound();
-            }
 
             return View(product);
         }
