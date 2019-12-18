@@ -5,6 +5,7 @@ using System.Net.Http;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using ThAmCo.Products.Data;
@@ -38,11 +39,38 @@ namespace ThAmCo.Products.Controllers
             if (Description != null)
                 products = products.Where(p => p.Description.Contains(Description)).ToList();
 
+            var productsWithPriceStock = new List<ProductsPriceStockModel>();
+
+            var client = _clientFactory.CreateClient("StandardRequest");
+            client.DefaultRequestHeaders.Accept.ParseAdd("application/json");
+            
+            foreach (var p in products)
+            {
+                var response = await client.GetAsync("https://localhost:44385/stock/" + p.Id);
+                if (response.IsSuccessStatusCode)
+                {
+                    var stockAndPrice = await response.Content.ReadAsAsync<ProductsPriceStockModel>();
+                    productsWithPriceStock.Add(new ProductsPriceStockModel
+                    {
+                        Product = p,
+                        Price = stockAndPrice.Price,
+                        Stock = stockAndPrice.Stock
+                    });
+                }
+                else
+                    productsWithPriceStock.Add(new ProductsPriceStockModel
+                    {
+                        Product = p,
+                        Price = null,
+                        Stock = null
+                    });
+            }
+
             var productIndex = new ProductsIndexModel
             {
                 Name = Name ?? "",
                 Description = Description ?? "",
-                Products = products,
+                Products = productsWithPriceStock,
                 BrandId = BrandId,
                 CategoryId = CategoryId
             };
