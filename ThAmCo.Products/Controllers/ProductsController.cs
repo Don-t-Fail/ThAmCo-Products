@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Http;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 using ThAmCo.Products.Data;
 using ThAmCo.Products.Models.ViewModels;
 
@@ -13,10 +15,12 @@ namespace ThAmCo.Products.Controllers
     public class ProductsController : Controller
     {
         private readonly ProductsDbContext _context;
+        private readonly IHttpClientFactory _clientFactory;
 
-        public ProductsController(ProductsDbContext context)
+        public ProductsController(ProductsDbContext context, IHttpClientFactory clientFactory)
         {
             _context = context;
+            _clientFactory = clientFactory;
         }
 
         // GET: Products
