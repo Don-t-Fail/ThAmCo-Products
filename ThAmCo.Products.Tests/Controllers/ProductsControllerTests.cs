@@ -1,4 +1,4 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -16,20 +16,21 @@ namespace ThAmCo.Products.Tests.Controllers
     [TestClass]
     public class ProductsControllerTests
     {
+        private 
         //[TestMethod]
         public async Task GetProductIndex_AllValid_AllReturned()
         {
-            var brands = new List<Brand>()
+            var brands = new List<Brand>
             {
                 new Brand { Id = 1, Name = "Brand 1"},
                 new Brand { Id = 2, Name = "Brand 2"}
             };
-            var categories = new List<Category>()
+            var categories = new List<Category>
             {
                 new Category { Id = 1, Name = "Category 1"},
                 new Category { Id = 2, Name = "Category 2"}
             };
-            var products = new List<Product>()
+            var products = new List<Product>
             {
                 new Product{ Id = 1, Name = "Product 1", Description = "Description 1", BrandId = 1, Brand = brands[0], CategoryId = 1, Category = categories[0], Active = true},
                 new Product{ Id = 2, Name = "Product 2", Description = "Description 2", BrandId = 2, Brand = brands[1], CategoryId = 2, Category = categories[1], Active = true}
