@@ -9,16 +9,17 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using ThAmCo.Products.Data;
+using ThAmCo.Products.Data.ProductsContext;
 using ThAmCo.Products.Models.ViewModels;
 
 namespace ThAmCo.Products.Controllers
 {
     public class ProductsController : Controller
     {
-        private readonly ProductsDbContext _context;
+        private readonly ProductsContext _context;
         private readonly IHttpClientFactory _clientFactory;
 
-        public ProductsController(ProductsDbContext context, IHttpClientFactory clientFactory)
+        public ProductsController(ProductsContext context, IHttpClientFactory clientFactory)
         {
             _context = context;
             _clientFactory = clientFactory;
@@ -27,7 +28,7 @@ namespace ThAmCo.Products.Controllers
         // GET: Products
         public async Task<IActionResult> Index(double? PriceLow, double? PriceHigh, string Name, string Description, int BrandId = 0, int CategoryId = 0)
         {
-            var products = await _context.Products.Where(p => p.Active).Include(p => p.Category).Include(p => p.Brand).ToListAsync();
+            var products = await _context.GetAllActive();
             
             if (BrandId != 0)
                 products = products.Where(p => p.BrandId == BrandId).ToList();
@@ -75,8 +76,8 @@ namespace ThAmCo.Products.Controllers
                 CategoryId = CategoryId
             };
 
-            ViewData["BrandList"] = new SelectList(_context.Brands, "Id", "Name");
-            ViewData["CategoryList"] = new SelectList(_context.Category, "Id", "Name");
+            ViewData["BrandList"] = new SelectList(_context.GetBrandsAsync().Result, "Id", "Name");
+            ViewData["CategoryList"] = new SelectList(_context.GetCategoriesAsync().Result, "Id", "Name");
 
             return View(productIndex);
         }
@@ -87,7 +88,7 @@ namespace ThAmCo.Products.Controllers
             if (id == null)
                 return NotFound();
 
-            var product = await _context.Products.FirstOrDefaultAsync(m => m.Id == id);
+            var product = await _context.GetProductAsync(id ?? 0);
 
             if (product == null)
                 return NotFound();
@@ -110,8 +111,7 @@ namespace ThAmCo.Products.Controllers
         {
             if (ModelState.IsValid)
             {
-                _context.Add(product);
-                await _context.SaveChangesAsync();
+                _context.AddProductAsync(product);
                 return RedirectToAction(nameof(Index));
             }
             return View(product);
@@ -123,7 +123,7 @@ namespace ThAmCo.Products.Controllers
             if (id == null)
                 return NotFound();
 
-            var product = await _context.Products.FindAsync(id);
+            var product = await _context.GetProductAsync(id ?? 0);
 
             if (product == null)
                 return NotFound();
@@ -138,7 +138,8 @@ namespace ThAmCo.Products.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, [Bind("Id,Name,Description,Active")] Product product)
         {
-            if (id != product.Id)
+            throw new NotImplementedException();
+            /*if (id != product.Id)
                 return NotFound();
 
             if (ModelState.IsValid)
@@ -157,7 +158,7 @@ namespace ThAmCo.Products.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
-            return View(product);
+            return View(product);*/
         }
 
         // GET: Products/Delete/5
@@ -166,7 +167,7 @@ namespace ThAmCo.Products.Controllers
             if (id == null)
                 return NotFound();
 
-            var product = await _context.Products.FirstOrDefaultAsync(m => m.Id == id);
+            var product = await _context.GetProductAsync(id ?? 0);
 
             if (product == null)
                 return NotFound();
@@ -179,16 +180,14 @@ namespace ThAmCo.Products.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var product = await _context.Products.FindAsync(id);
-            product.Active = false;
-            _context.Products.Update(product);
-            await _context.SaveChangesAsync();
+            var product = await _context.GetProductAsync(id);
+            _context.SoftDeleteProductAsync(product);
             return RedirectToAction(nameof(Index));
         }
 
         private bool ProductExists(int id)
         {
-            return _context.Products.Any(e => e.Id == id);
+            return _context.GetAll().Result.Any(e => e.Id == id);
         }
     }
 }
