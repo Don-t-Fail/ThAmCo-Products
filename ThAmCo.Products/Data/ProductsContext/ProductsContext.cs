@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 
@@ -16,7 +17,12 @@ namespace ThAmCo.Products.Data.ProductsContext
         
         public async Task<IEnumerable<Product>> GetAll()
         {
-            return await _context.Products.ToListAsync();
+            return await _context.Products.Include(p => p.Category).Include(p => p.Brand).ToListAsync();
+        }
+
+        public async Task<IEnumerable<Product>> GetAllActive()
+        {
+            return await _context.Products.Where(p => p.Active).Include(p => p.Category).Include(p => p.Brand).ToListAsync();
         }
 
         public async Task<Product> GetProductAsync(int id)
@@ -48,6 +54,16 @@ namespace ThAmCo.Products.Data.ProductsContext
                 _context.Update(productToChange);
                 SaveAndUpdateContext();
             }
+        }
+
+        public Task<IEnumerable<Brand>> GetBrandsAsync()
+        {
+            return Task.FromResult(_context.Brands.AsEnumerable());
+        }
+
+        public Task<IEnumerable<Category>> GetCategoriesAsync()
+        {
+            return Task.FromResult(_context.Category.AsEnumerable());
         }
 
         public async void SaveAndUpdateContext()

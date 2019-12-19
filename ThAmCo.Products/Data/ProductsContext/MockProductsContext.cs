@@ -9,16 +9,25 @@ namespace ThAmCo.Products.Data.ProductsContext
 {
     public class MockProductsContext : IProductsContext
     {
-        private List<Product> _products;
+        private readonly List<Product> _products;
+        private List<Brand> _brands;
+        private List<Category> _categories;
 
-        public MockProductsContext(List<Product> context)
+        public MockProductsContext(List<Product> products, List<Brand> brands, List<Category> categories)
         {
-            _products = context;
+            _products = products;
+            _brands = brands;
+            _categories = categories;
         }
         
         public Task<IEnumerable<Product>> GetAll()
         {
             return Task.FromResult(_products.AsEnumerable());
+        }
+
+        public Task<IEnumerable<Product>> GetAllActive()
+        {
+            return Task.FromResult(_products.Where(p => p.Active));
         }
 
         public Task<Product> GetProductAsync(int id)
@@ -31,7 +40,7 @@ namespace ThAmCo.Products.Data.ProductsContext
             _products.Add(product);
         }
 
-        public async void SoftDeleteProductAsync(Product product = null, int? id = null)
+        public void SoftDeleteProductAsync(Product product = null, int? id = null)
         {
             var chosenId = 0;
             if (product == null && id != null)
@@ -46,7 +55,17 @@ namespace ThAmCo.Products.Data.ProductsContext
             }
         }
 
-        public async void SaveAndUpdateContext()
+        public Task<IEnumerable<Brand>> GetBrandsAsync()
+        {
+            return Task.FromResult(_brands.AsEnumerable());
+        }
+
+        public Task<IEnumerable<Category>> GetCategoriesAsync()
+        {
+            return Task.FromResult(_categories.AsEnumerable());
+        }
+
+        public void SaveAndUpdateContext()
         {
             throw new NotImplementedException();
         }
