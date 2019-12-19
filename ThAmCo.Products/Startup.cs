@@ -12,6 +12,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Polly;
 using ThAmCo.Products.Data;
+using ThAmCo.Products.Data.ProductsContext;
 
 namespace ThAmCo.Products
 {
@@ -46,6 +47,8 @@ namespace ThAmCo.Products
                         .WaitAndRetryAsync(3, retryAttempt => TimeSpan.FromSeconds(Math.Pow(2, retryAttempt))))
                 .AddTransientHttpErrorPolicy(p =>
                     p.CircuitBreakerAsync(5, TimeSpan.FromSeconds(30)));
+
+            services.AddScoped<ProductsContext>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
