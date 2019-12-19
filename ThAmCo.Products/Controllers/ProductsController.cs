@@ -16,10 +16,10 @@ namespace ThAmCo.Products.Controllers
 {
     public class ProductsController : Controller
     {
-        private readonly ProductsContext _context;
+        private readonly IProductsContext _context;
         private readonly IHttpClientFactory _clientFactory;
 
-        public ProductsController(ProductsContext context, IHttpClientFactory clientFactory)
+        public ProductsController(IProductsContext context, IHttpClientFactory clientFactory)
         {
             _context = context;
             _clientFactory = clientFactory;
