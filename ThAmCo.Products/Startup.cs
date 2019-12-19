@@ -48,7 +48,7 @@ namespace ThAmCo.Products
                 .AddTransientHttpErrorPolicy(p =>
                     p.CircuitBreakerAsync(5, TimeSpan.FromSeconds(30)));
 
-            services.AddScoped<ProductsContext>();
+            services.AddScoped<IProductsContext, ProductsContext>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
