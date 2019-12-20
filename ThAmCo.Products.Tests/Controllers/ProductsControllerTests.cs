@@ -1,15 +1,11 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
-using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using ThAmCo.Products.Controllers;
 using ThAmCo.Products.Data;
 using ThAmCo.Products.Data.ProductsContext;
-using System.Net.Http;
 
 namespace ThAmCo.Products.Tests.Controllers
 {
