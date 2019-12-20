@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-
-namespace ThAmCo.Products.Data
+﻿namespace ThAmCo.Products.Data
 {
     public class Brand
     {
