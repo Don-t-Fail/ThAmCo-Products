@@ -44,16 +44,16 @@ namespace ThAmCo.Products.Data
             {
                 builder.Entity<Brand>()
                     .HasData(
-                        new Brand { Id = 1, Name = "Brand 1"},
-                        new Brand { Id = 2, Name = "Brand 2"},
-                        new Brand { Id = 3, Name = "Brand 3"}
+                        new Brand { Id = 1, Name = "Brand 1", Description = "Description 1", AvailableProductCount = 3 },
+                        new Brand { Id = 2, Name = "Brand 2", Description = "Description 2", AvailableProductCount = 2 },
+                        new Brand { Id = 3, Name = "Brand 3", Description = "Description 3", AvailableProductCount = 3 }
                     );
 
                 builder.Entity<Category>()
                     .HasData(
-                        new Category { Id = 1, Name = "Category 1"},
-                        new Category { Id = 2, Name = "Category 2"},
-                        new Category { Id = 3, Name = "Category 3"}
+                        new Category { Id = 1, Name = "Category 1", AvailableProductCount = 4 },
+                        new Category { Id = 2, Name = "Category 2", AvailableProductCount = 3 },
+                        new Category { Id = 3, Name = "Category 3", AvailableProductCount = 2 }
                     );
 
                 builder.Entity<Product>()

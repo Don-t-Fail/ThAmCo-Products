@@ -18,8 +18,8 @@ namespace ThAmCo.Products.Tests.Controllers
             {
                 return new List<Brand>
                 {
-                    new Brand { Id = 1, Name = "Brand 1"},
-                    new Brand { Id = 2, Name = "Brand 2"}
+                    new Brand { Id = 1, Name = "Brand 1", Description = "Description 1", AvailableProductCount = 4 },
+                    new Brand { Id = 2, Name = "Brand 2", Description = "Description 2", AvailableProductCount = 2 }
                 };
             }
 
@@ -27,8 +27,8 @@ namespace ThAmCo.Products.Tests.Controllers
             {
                 return new List<Category>
                 {
-                    new Category { Id = 1, Name = "Category 1"},
-                    new Category { Id = 2, Name = "Category 2"}
+                    new Category { Id = 1, Name = "Category 1", AvailableProductCount = 4 },
+                    new Category { Id = 2, Name = "Category 2", AvailableProductCount = 12 }
                 };
             }
 
