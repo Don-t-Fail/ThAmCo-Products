@@ -1,8 +1,14 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using System;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
+using System.Net.Http;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
+using Moq;
+using Moq.Protected;
 using ThAmCo.Products.Controllers;
 using ThAmCo.Products.Data;
 using ThAmCo.Products.Data.ProductsContext;
@@ -41,6 +47,20 @@ namespace ThAmCo.Products.Tests.Controllers
                 };
             }
         }
+
+        private Mock<HttpMessageHandler> CreateHttpMock(HttpResponseMessage expected)
+        {
+            var mock = new Mock<HttpMessageHandler>();
+            mock.Protected()
+                .Setup<Task<HttpResponseMessage>>(
+                    "SendAsync",
+                    ItExpr.IsAny<HttpRequestMessage>(),
+                    ItExpr.IsAny<CancellationToken>())
+                .ReturnsAsync(expected)
+                .Verifiable();
+            return mock;
+        }
+        
         //[TestMethod]
         public async Task GetProductIndex_AllValid_AllReturned()
         {
