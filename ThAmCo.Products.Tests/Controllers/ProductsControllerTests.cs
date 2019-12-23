@@ -4,14 +4,18 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
 using Moq.Protected;
+using Newtonsoft.Json;
 using ThAmCo.Products.Controllers;
 using ThAmCo.Products.Data;
 using ThAmCo.Products.Data.ProductsContext;
+using ThAmCo.Products.Models.DTOs;
+using ThAmCo.Products.Models.ViewModels;
 
 namespace ThAmCo.Products.Tests.Controllers
 {
@@ -64,21 +68,44 @@ namespace ThAmCo.Products.Tests.Controllers
         //[TestMethod]
         public async Task GetProductIndex_AllValid_AllReturned()
         {
+            var expectedResult = new FromSingleStockDTO { ProductID = 1, Stock = 4, Price = 8.99 };
+            var expectedJson = JsonConvert.SerializeObject(expectedResult);
+            var expectedUri = new Uri("https://localhost:44385/stock/1");
+            var expectedResponse = new HttpResponseMessage
+            {
+                StatusCode = HttpStatusCode.OK,
+                Content = new StringContent(expectedJson,
+                                            Encoding.UTF8,
+                                            "application/json")
+            };
+            var mock = CreateHttpMock(expectedResponse);
+            
+            var httpClient = new HttpClient(mock.Object);
+
             var brands = Data.Brands();
             var categories = Data.Categories();
             var products = Data.Products();
             var context = new MockProductsContext(products, brands, categories);
             var controller = new ProductsController(context, null);
+            controller._httpClient = new HttpClient(mock.Object);
 
             var result = await controller.Index(null, null, null, null);
             
             Assert.IsNotNull(result);
             var objectResult = result as OkObjectResult;
             Assert.IsNotNull(objectResult);
-            var enumerableResult = objectResult.Value as IEnumerable<Product>;
-            Assert.IsNotNull(enumerableResult);
-            var enumerableResultList = enumerableResult.ToList();
-            Assert.AreEqual(products, enumerableResultList);
+            var dtoResult = objectResult.Value as ProductsIndexModel;
+            Assert.IsNotNull(dtoResult);
+            
+            Assert.IsNull(dtoResult.PriceLow);
+            Assert.IsNull(dtoResult.PriceHigh);
+            Assert.IsNull(dtoResult.Name);
+            Assert.IsNull(dtoResult.Description);
+            foreach (var p in dtoResult.Products)
+            {
+                Assert.AreEqual(4, p.Stock);
+                Assert.AreEqual(8.99, p.Price);
+            }
         }
 
         [TestMethod]
