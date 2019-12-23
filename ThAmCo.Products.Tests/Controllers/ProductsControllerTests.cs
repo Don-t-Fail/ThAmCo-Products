@@ -87,7 +87,7 @@ namespace ThAmCo.Products.Tests.Controllers
             var products = Data.Products();
             var context = new MockProductsContext(products, brands, categories);
             var controller = new ProductsController(context, null);
-            controller._httpClient = new HttpClient(mock.Object);
+            controller.HttpClient = new HttpClient(mock.Object);
 
             var result = await controller.Index(null, null, null, null);
             
@@ -101,6 +101,7 @@ namespace ThAmCo.Products.Tests.Controllers
             Assert.IsNull(dtoResult.PriceHigh);
             Assert.IsNull(dtoResult.Name);
             Assert.IsNull(dtoResult.Description);
+            
             foreach (var p in dtoResult.Products)
             {
                 Assert.AreEqual(4, p.Stock);

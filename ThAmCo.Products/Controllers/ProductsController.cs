@@ -16,7 +16,7 @@ namespace ThAmCo.Products.Controllers
         private readonly IProductsContext _context;
         private readonly IHttpClientFactory _clientFactory;
         
-        public HttpClient _httpClient { get; set; }
+        public HttpClient HttpClient { get; set; }
 
         public ProductsController(IProductsContext context, IHttpClientFactory clientFactory)
         {
@@ -191,7 +191,7 @@ namespace ThAmCo.Products.Controllers
 
         private HttpClient getHttpClient(string s)
         {
-            if (_clientFactory == null && _httpClient != null) return _httpClient;
+            if (_clientFactory == null && HttpClient != null) return HttpClient;
             
             return _clientFactory.CreateClient(s);
         }
