@@ -81,15 +81,13 @@ namespace ThAmCo.Products.Tests.Controllers
         [TestMethod]
         public async Task GetProductIndex_AllValid_AllReturned()
         {
-            var expectedResult = new MultipleStockListDTO
+            var expectedResult = new List<MultipleStockDTO>
             {
-                Stocks = new List<MultipleStockDTO>
-                {
-                    new MultipleStockDTO { ProductStock = Data.ProductStocks()[0], Price = Data.Prices()[0]},
-                    new MultipleStockDTO { ProductStock = Data.ProductStocks()[1], Price = Data.Prices()[2] }
-                }
-            };
+                new MultipleStockDTO { ProductStock = Data.ProductStocks()[0], Price = Data.Prices()[0]}, 
+                new MultipleStockDTO { ProductStock = Data.ProductStocks()[1], Price = Data.Prices()[2] }
+                };
             var expectedJson = JsonConvert.SerializeObject(expectedResult);
+            Console.WriteLine(expectedJson);
             var expectedUri = new Uri("https://localhost:44385/stock/");
             var expectedResponse = new HttpResponseMessage
             {
