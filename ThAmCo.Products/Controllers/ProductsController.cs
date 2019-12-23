@@ -41,7 +41,7 @@ namespace ThAmCo.Products.Controllers
 
             var productsWithPriceStock = new List<ProductsPriceStockModel>();
 
-            var client = getHttpClient("StandardRequest");
+            var client = GetHttpClient("StandardRequest");
             client.DefaultRequestHeaders.Accept.ParseAdd("application/json");
             
             foreach (var p in products)
@@ -189,7 +189,7 @@ namespace ThAmCo.Products.Controllers
             return _context.GetAll().Result.Any(e => e.Id == id);
         }
 
-        private HttpClient getHttpClient(string s)
+        private HttpClient GetHttpClient(string s)
         {
             if (_clientFactory == null && HttpClient != null) return HttpClient;
             
