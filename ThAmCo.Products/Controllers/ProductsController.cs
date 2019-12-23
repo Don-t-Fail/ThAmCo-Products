@@ -49,8 +49,8 @@ namespace ThAmCo.Products.Controllers
             var response = await client.GetAsync("https://localhost:44385/stock/");
             if (response.IsSuccessStatusCode)
             {
-                var objectResult = await response.Content.ReadAsAsync<MultipleStockListDTO>();
-                foreach (var t in objectResult.Stocks)
+                var objectResult = await response.Content.ReadAsAsync<List<MultipleStockDTO>>();
+                foreach (var t in objectResult)
                     productsWithPriceStock.Add(new ProductsPriceStockModel
                     {
                         Product = await _context.GetProductAsync(t.ProductStock.ProductId),
