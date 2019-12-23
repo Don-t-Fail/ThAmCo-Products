@@ -50,6 +50,19 @@ namespace ThAmCo.Products.Tests.Controllers
                     new Product{ Id = 2, Name = "Product 2", Description = "Description 2", BrandId = 2, Brand = Brands()[1], CategoryId = 2, Category = Categories()[1], Active = true}
                 };
             }
+            
+            public static List<ProductStockDTO> ProductStocks() => new List<ProductStockDTO>
+            {
+                new ProductStockDTO { Id = 1, Stock = 10, PriceId = 1, ProductId = 1 },
+                new ProductStockDTO { Id = 2, Stock = 0, PriceId = 3, ProductId = 2 }
+            };
+            
+            public static List<PriceDTO> Prices() => new List<PriceDTO>
+            {
+                new PriceDTO { Id = 1, ProductStockId = 1, ProductPrice = 8.99 },
+                new PriceDTO { Id = 2, ProductStockId = 2, ProductPrice = 24.99 },
+                new PriceDTO { Id = 3, ProductStockId = 2, ProductPrice = 19.99 }
+            };
         }
 
         private Mock<HttpMessageHandler> CreateHttpMock(HttpResponseMessage expected)
@@ -68,9 +81,14 @@ namespace ThAmCo.Products.Tests.Controllers
         [TestMethod]
         public async Task GetProductIndex_AllValid_AllReturned()
         {
-            var expectedResult = new FromSingleStockDTO { ProductID = 1, Stock = 4, Price = 8.99 };
+            var expectedResult = new List<MultipleStockDTO>
+            {
+                new MultipleStockDTO { ProductStock = Data.ProductStocks()[0], Price = Data.Prices()[0]}, 
+                new MultipleStockDTO { ProductStock = Data.ProductStocks()[1], Price = Data.Prices()[2] }
+                };
             var expectedJson = JsonConvert.SerializeObject(expectedResult);
-            var expectedUri = new Uri("https://localhost:44385/stock/1");
+            Console.WriteLine(expectedJson);
+            var expectedUri = new Uri("https://localhost:44385/stock/");
             var expectedResponse = new HttpResponseMessage
             {
                 StatusCode = HttpStatusCode.OK,
@@ -110,9 +128,13 @@ namespace ThAmCo.Products.Tests.Controllers
                 Assert.IsNotNull(brandExpected);
                 var categoryExpected = Data.Categories().FirstOrDefault(cat => cat.Id == productExpected.CategoryId);
                 Assert.IsNotNull(categoryExpected);
+                var stockExpected = Data.ProductStocks().FirstOrDefault(stocks => stocks.ProductId == p.Product.Id);
+                Assert.IsNotNull(stockExpected);
+                var priceExpected = Data.Prices().FirstOrDefault(price => price.Id == stockExpected.PriceId);
+                Assert.IsNotNull(priceExpected);
                 
-                Assert.AreEqual(4, p.Stock);
-                Assert.AreEqual(8.99, p.Price);
+                Assert.AreEqual(stockExpected.Stock, p.Stock);
+                Assert.AreEqual(priceExpected.ProductPrice, p.Price);
                 
                 Assert.AreEqual(p.Product.Active, productExpected.Active);
                 Assert.AreEqual(p.Product.Description, productExpected.Description);
