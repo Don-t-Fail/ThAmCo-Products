@@ -65,7 +65,7 @@ namespace ThAmCo.Products.Tests.Controllers
             return mock;
         }
         
-        //[TestMethod]
+        [TestMethod]
         public async Task GetProductIndex_AllValid_AllReturned()
         {
             var expectedResult = new FromSingleStockDTO { ProductID = 1, Stock = 4, Price = 8.99 };
@@ -87,24 +87,48 @@ namespace ThAmCo.Products.Tests.Controllers
             var products = Data.Products();
             var context = new MockProductsContext(products, brands, categories);
             var controller = new ProductsController(context, null);
-            controller._httpClient = new HttpClient(mock.Object);
+            controller.HttpClient = new HttpClient(mock.Object);
 
             var result = await controller.Index(null, null, null, null);
             
             Assert.IsNotNull(result);
-            var objectResult = result as OkObjectResult;
+            var objectResult = result as ViewResult;
             Assert.IsNotNull(objectResult);
-            var dtoResult = objectResult.Value as ProductsIndexModel;
+            var dtoResult = objectResult.Model as ProductsIndexModel;
             Assert.IsNotNull(dtoResult);
             
             Assert.IsNull(dtoResult.PriceLow);
             Assert.IsNull(dtoResult.PriceHigh);
-            Assert.IsNull(dtoResult.Name);
-            Assert.IsNull(dtoResult.Description);
+            Assert.AreEqual(dtoResult.Name, string.Empty);
+            Assert.AreEqual(dtoResult.Description, string.Empty);
+            
             foreach (var p in dtoResult.Products)
             {
+                var productExpected = Data.Products().FirstOrDefault(prod => prod.Id == p.Product.Id);
+                Assert.IsNotNull(productExpected);
+                var brandExpected = Data.Brands().FirstOrDefault(brand => brand.Id == productExpected.BrandId);
+                Assert.IsNotNull(brandExpected);
+                var categoryExpected = Data.Categories().FirstOrDefault(cat => cat.Id == productExpected.CategoryId);
+                Assert.IsNotNull(categoryExpected);
+                
                 Assert.AreEqual(4, p.Stock);
                 Assert.AreEqual(8.99, p.Price);
+                
+                Assert.AreEqual(p.Product.Active, productExpected.Active);
+                Assert.AreEqual(p.Product.Description, productExpected.Description);
+                Assert.AreEqual(p.Product.Id, productExpected.Id);
+                Assert.AreEqual(p.Product.Name, productExpected.Name);
+                Assert.AreEqual(p.Product.BrandId, productExpected.BrandId);
+                Assert.AreEqual(p.Product.CategoryId, productExpected.CategoryId);
+                
+                Assert.AreEqual(p.Product.Brand.Description, brandExpected.Description);
+                Assert.AreEqual(p.Product.Brand.Id, brandExpected.Id);
+                Assert.AreEqual(p.Product.Brand.Name, brandExpected.Name);
+                Assert.AreEqual(p.Product.Brand.AvailableProductCount, brandExpected.AvailableProductCount);
+                
+                Assert.AreEqual(p.Product.Category.Id, categoryExpected.Id);
+                Assert.AreEqual(p.Product.Category.Name, categoryExpected.Name);
+                Assert.AreEqual(p.Product.Category.AvailableProductCount, categoryExpected.AvailableProductCount);
             }
         }
 

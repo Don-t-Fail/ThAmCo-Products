@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using ThAmCo.Products.Data;
 using ThAmCo.Products.Data.ProductsContext;
+using ThAmCo.Products.Models.DTOs;
 using ThAmCo.Products.Models.ViewModels;
 
 namespace ThAmCo.Products.Controllers
@@ -16,7 +17,7 @@ namespace ThAmCo.Products.Controllers
         private readonly IProductsContext _context;
         private readonly IHttpClientFactory _clientFactory;
         
-        public HttpClient _httpClient { get; set; }
+        public HttpClient HttpClient { get; set; }
 
         public ProductsController(IProductsContext context, IHttpClientFactory clientFactory)
         {
@@ -41,20 +42,20 @@ namespace ThAmCo.Products.Controllers
 
             var productsWithPriceStock = new List<ProductsPriceStockModel>();
 
-            var client = getHttpClient("StandardRequest");
+            var client = GetHttpClient("StandardRequest");
             client.DefaultRequestHeaders.Accept.ParseAdd("application/json");
             
             foreach (var p in products)
             {
-                var response = await client.GetAsync("https://localhost:44385/stock/" + p.Id);
+                var response = await client.GetAsync("https://localhost:44385/stock/1");
                 if (response.IsSuccessStatusCode)
                 {
-                    var stockAndPrice = await response.Content.ReadAsAsync<ProductsPriceStockModel>();
+                    var stockAndPrice = await response.Content.ReadAsAsync<FromSingleStockDTO>();
                     productsWithPriceStock.Add(new ProductsPriceStockModel
                     {
                         Product = p,
-                        Price = stockAndPrice.Price,
-                        Stock = stockAndPrice.Stock
+                        Price = stockAndPrice?.Price,
+                        Stock = stockAndPrice?.Stock
                     });
                 }
                 else
@@ -189,9 +190,9 @@ namespace ThAmCo.Products.Controllers
             return _context.GetAll().Result.Any(e => e.Id == id);
         }
 
-        private HttpClient getHttpClient(string s)
+        private HttpClient GetHttpClient(string s)
         {
-            if (_clientFactory == null && _httpClient != null) return _httpClient;
+            if (_clientFactory == null && HttpClient != null) return HttpClient;
             
             return _clientFactory.CreateClient(s);
         }
