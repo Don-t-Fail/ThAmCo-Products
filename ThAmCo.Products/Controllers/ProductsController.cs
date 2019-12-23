@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
@@ -45,27 +46,20 @@ namespace ThAmCo.Products.Controllers
             var client = GetHttpClient("StandardRequest");
             client.DefaultRequestHeaders.Accept.ParseAdd("application/json");
             
-            foreach (var p in products)
+            var response = await client.GetAsync("https://localhost:44385/stock/");
+            if (response.IsSuccessStatusCode)
             {
-                var response = await client.GetAsync("https://localhost:44385/stock/1");
-                if (response.IsSuccessStatusCode)
-                {
-                    var stockAndPrice = await response.Content.ReadAsAsync<FromSingleStockDTO>();
+                var objectResult = await response.Content.ReadAsAsync<MultipleStockListDTO>();
+                foreach (var t in objectResult.Stocks)
                     productsWithPriceStock.Add(new ProductsPriceStockModel
                     {
-                        Product = p,
-                        Price = stockAndPrice?.Price,
-                        Stock = stockAndPrice?.Stock
-                    });
-                }
-                else
-                    productsWithPriceStock.Add(new ProductsPriceStockModel
-                    {
-                        Product = p,
-                        Price = null,
-                        Stock = null
+                        Product = await _context.GetProductAsync(t.ProductStock.ProductId),
+                        Price = t.Price.ProductPrice,
+                        Stock = t.ProductStock.Stock
                     });
             }
+            else
+                productsWithPriceStock.AddRange(products.Select(p => new ProductsPriceStockModel {Product = p, Price = null, Stock = null}));
 
             var productIndex = new ProductsIndexModel
             {
