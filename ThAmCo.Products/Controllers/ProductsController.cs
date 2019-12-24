@@ -179,6 +179,13 @@ namespace ThAmCo.Products.Controllers
             return RedirectToAction(nameof(Index));
         }
 
+        [HttpGet]
+        public async Task<ActionResult<Product>> GetProduct(int id)
+        {
+            var product = await _context.GetProductAsync(id);
+            return Ok(product);
+        }
+
         private bool ProductExists(int id)
         {
             return _context.GetAll().Result.Any(e => e.Id == id);
