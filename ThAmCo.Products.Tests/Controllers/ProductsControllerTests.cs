@@ -224,7 +224,13 @@ namespace ThAmCo.Products.Tests.Controllers
             Assert.IsNotNull(result);
             var productResult = result as RedirectToActionResult;
             Assert.IsNotNull(productResult);
-            Assert.AreEqual(resultContent, expectedResult);
+
+            Assert.AreEqual(expectedResult.Id, resultContent.Id);
+            Assert.AreEqual(expectedResult.Name, resultContent.Name);
+            Assert.AreEqual(expectedResult.Active, resultContent.Active);
+            Assert.AreEqual(expectedResult.BrandId, resultContent.BrandId);
+            Assert.AreEqual(expectedResult.CategoryId, resultContent.CategoryId);
+            Assert.AreEqual(expectedResult.Description, resultContent.Description);
         }
         
         [TestMethod]
