@@ -77,6 +77,8 @@ namespace ThAmCo.Products.Tests.Controllers
                 .Verifiable();
             return mock;
         }
+
+        private const int outOfBoundsId = 3;
         
         [TestMethod]
         public async Task GetProductIndex_AllValid_AllReturned()
@@ -182,7 +184,7 @@ namespace ThAmCo.Products.Tests.Controllers
             var context = new MockProductsContext(products, brands, categories);
             var controller = new ProductsController(context, null);
 
-            var result = await controller.Details(3);
+            var result = await controller.Details(outOfBoundsId);
             
             Assert.IsNotNull(result);
             var productResult = result as NotFoundResult;
@@ -243,7 +245,7 @@ namespace ThAmCo.Products.Tests.Controllers
             var controller = new ProductsController(context, null);
 
             var unchangedResult = context.GetAll().Result.ToList();
-            var result = await controller.DeleteConfirmed(1);
+            var result = await controller.DeleteConfirmed(outOfBoundsId);
             var resultContent = context.GetAll().Result.ToList();
 
             Assert.AreEqual(unchangedResult.Count, resultContent.Count);
