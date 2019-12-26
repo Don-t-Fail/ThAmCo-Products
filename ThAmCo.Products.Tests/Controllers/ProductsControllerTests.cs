@@ -77,6 +77,8 @@ namespace ThAmCo.Products.Tests.Controllers
                 .Verifiable();
             return mock;
         }
+
+        private const int outOfBoundsId = 3;
         
         [TestMethod]
         public async Task GetProductIndex_AllValid_AllReturned()
@@ -136,21 +138,21 @@ namespace ThAmCo.Products.Tests.Controllers
                 Assert.AreEqual(stockExpected.Stock, p.Stock);
                 Assert.AreEqual(priceExpected.ProductPrice, p.Price);
                 
-                Assert.AreEqual(p.Product.Active, productExpected.Active);
-                Assert.AreEqual(p.Product.Description, productExpected.Description);
-                Assert.AreEqual(p.Product.Id, productExpected.Id);
-                Assert.AreEqual(p.Product.Name, productExpected.Name);
-                Assert.AreEqual(p.Product.BrandId, productExpected.BrandId);
-                Assert.AreEqual(p.Product.CategoryId, productExpected.CategoryId);
+                Assert.AreEqual(productExpected.Active, p.Product.Active);
+                Assert.AreEqual(productExpected.Description, p.Product.Description);
+                Assert.AreEqual(productExpected.Id, p.Product.Id);
+                Assert.AreEqual(productExpected.Name, p.Product.Name);
+                Assert.AreEqual(productExpected.BrandId, p.Product.BrandId);
+                Assert.AreEqual(productExpected.CategoryId, p.Product.CategoryId);
                 
-                Assert.AreEqual(p.Product.Brand.Description, brandExpected.Description);
-                Assert.AreEqual(p.Product.Brand.Id, brandExpected.Id);
-                Assert.AreEqual(p.Product.Brand.Name, brandExpected.Name);
-                Assert.AreEqual(p.Product.Brand.AvailableProductCount, brandExpected.AvailableProductCount);
+                Assert.AreEqual(brandExpected.Description, p.Product.Brand.Description);
+                Assert.AreEqual(brandExpected.Id, p.Product.Brand.Id);
+                Assert.AreEqual(brandExpected.Name, p.Product.Brand.Name);
+                Assert.AreEqual(brandExpected.AvailableProductCount, p.Product.Brand.AvailableProductCount);
                 
-                Assert.AreEqual(p.Product.Category.Id, categoryExpected.Id);
-                Assert.AreEqual(p.Product.Category.Name, categoryExpected.Name);
-                Assert.AreEqual(p.Product.Category.AvailableProductCount, categoryExpected.AvailableProductCount);
+                Assert.AreEqual(categoryExpected.Id, p.Product.Category.Id);
+                Assert.AreEqual(categoryExpected.Name, p.Product.Category.Name);
+                Assert.AreEqual(categoryExpected.AvailableProductCount, p.Product.Category.AvailableProductCount);
             }
         }
 
@@ -170,7 +172,7 @@ namespace ThAmCo.Products.Tests.Controllers
             Assert.IsNotNull(productResult);
             var objectResult = productResult.Model as Product;
             Assert.IsNotNull(objectResult);
-            Assert.AreEqual(objectResult, products[1]);
+            Assert.AreEqual(products[1], objectResult);
         }
         
         [TestMethod]
@@ -182,7 +184,7 @@ namespace ThAmCo.Products.Tests.Controllers
             var context = new MockProductsContext(products, brands, categories);
             var controller = new ProductsController(context, null);
 
-            var result = await controller.Details(3);
+            var result = await controller.Details(outOfBoundsId);
             
             Assert.IsNotNull(result);
             var productResult = result as NotFoundResult;
@@ -224,7 +226,13 @@ namespace ThAmCo.Products.Tests.Controllers
             Assert.IsNotNull(result);
             var productResult = result as RedirectToActionResult;
             Assert.IsNotNull(productResult);
-            Assert.AreEqual(resultContent, expectedResult);
+
+            Assert.AreEqual(expectedResult.Id, resultContent.Id);
+            Assert.AreEqual(expectedResult.Name, resultContent.Name);
+            Assert.AreEqual(expectedResult.Active, resultContent.Active);
+            Assert.AreEqual(expectedResult.BrandId, resultContent.BrandId);
+            Assert.AreEqual(expectedResult.CategoryId, resultContent.CategoryId);
+            Assert.AreEqual(expectedResult.Description, resultContent.Description);
         }
         
         [TestMethod]
@@ -237,14 +245,15 @@ namespace ThAmCo.Products.Tests.Controllers
             var controller = new ProductsController(context, null);
 
             var unchangedResult = context.GetAll().Result.ToList();
-            var result = await controller.DeleteConfirmed(3);
+            var result = await controller.DeleteConfirmed(outOfBoundsId);
             var resultContent = context.GetAll().Result.ToList();
 
             Assert.AreEqual(unchangedResult.Count, resultContent.Count);
             Assert.IsNotNull(result);
             var productResult = result as RedirectToActionResult;
             Assert.IsNotNull(productResult);
-            CollectionAssert.AreEqual(resultContent, unchangedResult);
+
+            CollectionAssert.AreEqual(unchangedResult, resultContent);
         }
     }
 }
