@@ -87,7 +87,8 @@ namespace ThAmCo.Products.Tests.Controllers
             {
                 new MultipleStockDTO { ProductStock = Data.ProductStocks()[0], Price = Data.Prices()[0]}, 
                 new MultipleStockDTO { ProductStock = Data.ProductStocks()[1], Price = Data.Prices()[2] }
-                };
+            };
+
             var expectedJson = JsonConvert.SerializeObject(expectedResult);
             Console.WriteLine(expectedJson);
             var expectedUri = new Uri("https://localhost:44385/stock/");
@@ -254,6 +255,33 @@ namespace ThAmCo.Products.Tests.Controllers
             Assert.IsNotNull(productResult);
 
             CollectionAssert.AreEqual(unchangedResult, resultContent);
+        }
+
+        [TestMethod]
+        public async Task GetAllProducts_AllProductsReturned()
+        {
+            var brands = Data.Brands();
+            var categories = Data.Categories();
+            var products = Data.Products();
+            var context = new MockProductsContext(products, brands, categories);
+            var controller = new ProductsController(context, null);
+
+            var result = await controller.GetAllProducts();
+
+            Assert.IsNotNull(result);
+            var productResult = result.Result as OkObjectResult;
+            var productEnumerable = productResult.Value as IEnumerable<Product>;
+            var productList = productEnumerable.ToList();
+            Assert.AreEqual(products.Count, productList.Count);
+            for (int i = 0; i < products.Count; i++)
+            {
+                Assert.AreEqual(products[i].Id, productList[i].Id);
+                Assert.AreEqual(products[i].Active, productList[i].Active);
+                Assert.AreEqual(products[i].BrandId, productList[i].BrandId);
+                Assert.AreEqual(products[i].CategoryId, productList[i].CategoryId);
+                Assert.AreEqual(products[i].Description, productList[i].Description);
+                Assert.AreEqual(products[i].Name, productList[i].Name);
+            }
         }
     }
 }
