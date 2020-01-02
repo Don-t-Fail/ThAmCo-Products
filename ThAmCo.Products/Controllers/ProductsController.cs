@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -182,8 +182,13 @@ namespace ThAmCo.Products.Controllers
         [HttpGet]
         public async Task<ActionResult<Product>> GetProduct(int id)
         {
-            var product = await _context.GetProductAsync(id);
-            return Ok(product);
+            return Ok(await _context.GetProductAsync(id));
+        }
+
+        [HttpGet]
+        public async Task<ActionResult<IEnumerable<Product>>> GetAllProducts()
+        {
+            return Ok(await _context.GetAllActive());
         }
 
         private bool ProductExists(int id)
