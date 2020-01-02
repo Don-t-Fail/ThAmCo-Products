@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -17,7 +17,7 @@ namespace ThAmCo.Products.Controllers
     {
         private readonly IProductsContext _context;
         private readonly IHttpClientFactory _clientFactory;
-        
+
         public HttpClient HttpClient { get; set; }
 
         public ProductsController(IProductsContext context, IHttpClientFactory clientFactory)
@@ -30,7 +30,7 @@ namespace ThAmCo.Products.Controllers
         public async Task<IActionResult> Index(double? PriceLow, double? PriceHigh, string Name, string Description, int BrandId = 0, int CategoryId = 0)
         {
             var products = await _context.GetAllActive();
-            
+
             if (BrandId != 0)
                 products = products.Where(p => p.BrandId == BrandId).ToList();
             if (CategoryId != 0)
@@ -45,7 +45,7 @@ namespace ThAmCo.Products.Controllers
 
             var client = GetHttpClient("StandardRequest");
             client.DefaultRequestHeaders.Accept.ParseAdd("application/json");
-            
+
             var response = await client.GetAsync("https://localhost:44385/stock/");
             if (response.IsSuccessStatusCode)
             {
@@ -59,7 +59,7 @@ namespace ThAmCo.Products.Controllers
                     });
             }
             else
-                productsWithPriceStock.AddRange(products.Select(p => new ProductsPriceStockModel {Product = p, Price = null, Stock = null}));
+                productsWithPriceStock.AddRange(products.Select(p => new ProductsPriceStockModel { Product = p, Price = null, Stock = null }));
 
             var productIndex = new ProductsIndexModel
             {
