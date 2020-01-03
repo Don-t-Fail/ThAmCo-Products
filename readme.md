@@ -8,7 +8,7 @@ ThAmCo.Products
 
 
 ## Overview
-This web service handles stock and pricing within the ThAmCo project. Whilst this was mainly developed as an API controller, more views have been added to help finish some requirements.
+This web service handles products within the ThAmCo project. Stores product data and is the main place where products are shown to users.
 ## Tools Used
 * Visual Studio 2019 (With ReSharper)
 * Visual Studio Test Suite (Microsoft.VisualStudio.TestTools.UnitTesting)
