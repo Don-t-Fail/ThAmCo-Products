@@ -6,12 +6,29 @@ ThAmCo.Products
 
 
 
+
 ## Overview
-This web service handles products within the ThAmCo project. Stores product data and is the main place where products are shown to users.
+This web service handles stock and pricing within the ThAmCo project. Whilst this was mainly developed as an API controller, more views have been added to help finish some requirements.
 ## Tools Used
-* Visual Studio 2019
-* Azure Pipelines
+* Visual Studio 2019 (With ReSharper)
+* Visual Studio Test Suite (Microsoft.VisualStudio.TestTools.UnitTesting)
+* Visual Studio Code
+* Jetbrains Rider
+* Azure Pipelines (Self-Hosted Windows Agent)
+* ARC (Advanced REST Client)
+* GitKraken
+* GitHub Desktop
 * CodeFactor
-* Docker
+* Docker and Docker-Compose
 ## Testing
-Azure Pipelines was the CI chosen for this project, and is triggered on commit and pull request to the master and develop branch.
+### CI
+Azure Pipelines was the CI chosen for this project, and is triggered on commit and pull request to the master and develop branch. Merging to master and develop is not allowed if the solution does not build and tests do not pass.
+### Test Suite
+Testing is handled through the default Visual Studio test suite.
+To run all the tests in the project, use 
+>dotnet test
+
+
+Or use the test suite within Visual Studio or Rider.
+### Mocks
+Mock data contexts are included as an interface; and are generally created with simple lists (LINQ makes this simple, as data contexts are treated like lists). Mock HTTP clients are formed using the Moq package.
