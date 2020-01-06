@@ -1,5 +1,8 @@
 ﻿using System;
+using System.IO;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -44,6 +47,22 @@ namespace ThAmCo.Products
                 .AddTransientHttpErrorPolicy(p =>
                     p.CircuitBreakerAsync(5, TimeSpan.FromSeconds(30)));
 
+            services.AddAuthorization(options =>
+            {
+                options.AddPolicy("StaffOnly", builder =>
+                {
+                    builder.RequireClaim("role", "Staff");
+                });
+            });
+
+            services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+                .AddCookie(CookieAuthenticationDefaults.AuthenticationScheme,
+                    options =>
+                    {
+                        options.LoginPath = new PathString("/account/login");
+                        options.AccessDeniedPath = new PathString("/account/AccessDenied");
+                    });
+
             services.AddScoped<IProductsContext, ProductsContext>();
         }
 
@@ -64,6 +83,8 @@ namespace ThAmCo.Products
             app.UseHttpsRedirection();
             app.UseStaticFiles();
             app.UseCookiePolicy();
+
+            app.UseAuthentication();
 
             app.UseMvc(routes =>
             {
