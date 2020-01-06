@@ -36,9 +36,9 @@ namespace ThAmCo.Products.Controllers
             if (CategoryId != 0)
                 products = products.Where(p => p.CategoryId == CategoryId).ToList();
 
-            if (Name != null)
+            if (!String.IsNullOrEmpty(Name))
                 products = products.Where(p => p.Name.Contains(Name)).ToList();
-            if (Description != null)
+            if (!String.IsNullOrEmpty(Description))
                 products = products.Where(p => p.Description.Contains(Description)).ToList();
 
             var productsWithPriceStock = new List<ProductsPriceStockModel>();
@@ -46,7 +46,7 @@ namespace ThAmCo.Products.Controllers
             var client = GetHttpClient("StandardRequest");
             client.DefaultRequestHeaders.Accept.ParseAdd("application/json");
 
-            var response = await client.GetAsync("https://localhost:44385/stock/");
+            var response = await client.GetAsync("https://localhost:44385/stock/ProductStocks");
             if (response.IsSuccessStatusCode)
             {
                 var objectResult = await response.Content.ReadAsAsync<List<MultipleStockDTO>>();
