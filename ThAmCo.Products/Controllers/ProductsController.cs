@@ -4,6 +4,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using ThAmCo.Products.Data;
@@ -16,7 +18,7 @@ namespace ThAmCo.Products.Controllers
     public class ProductsController : Controller
     {
         private readonly IProductsContext _context;
-        private readonly IHttpClientFactory _clientFactory;
+        private readonly IHttpClientFactory _clientFactory; 
 
         public HttpClient HttpClient { get; set; }
 
@@ -27,8 +29,21 @@ namespace ThAmCo.Products.Controllers
         }
 
         // GET: Products
+        //Auth here?
+        [AllowAnonymous]
         public async Task<IActionResult> Index(double? PriceLow, double? PriceHigh, string Name, string Description, int BrandId = 0, int CategoryId = 0)
         {
+            var authenticated = false;
+
+            try
+            {
+                var authentication = await HttpContext.AuthenticateAsync();
+                authenticated = authentication.Succeeded;
+            }
+            catch
+            {
+            }
+
             var products = await _context.GetAllActive();
 
             if (BrandId != 0)
@@ -36,9 +51,9 @@ namespace ThAmCo.Products.Controllers
             if (CategoryId != 0)
                 products = products.Where(p => p.CategoryId == CategoryId).ToList();
 
-            if (Name != null)
-                products = products.Where(p => p.Name.Contains(Name)).ToList();
-            if (Description != null)
+            if (!String.IsNullOrEmpty(Name))
+                products = products.Where(p => p.Name.ToLower().Contains(Name.ToLower())).ToList();
+            if (!String.IsNullOrEmpty(Description))
                 products = products.Where(p => p.Description.Contains(Description)).ToList();
 
             var productsWithPriceStock = new List<ProductsPriceStockModel>();
@@ -46,17 +61,22 @@ namespace ThAmCo.Products.Controllers
             var client = GetHttpClient("StandardRequest");
             client.DefaultRequestHeaders.Accept.ParseAdd("application/json");
 
-            var response = await client.GetAsync("https://localhost:44385/stock/");
+            var response = await client.GetAsync("https://localhost:44385/stock/ProductStocks");
             if (response.IsSuccessStatusCode)
             {
                 var objectResult = await response.Content.ReadAsAsync<List<MultipleStockDTO>>();
-                foreach (var t in objectResult)
+                foreach (var t in products)
+                {
+                    int? stock = null;
+                    if (authenticated)
+                        stock = objectResult.FirstOrDefault(or => or.ProductStock.ProductId == t.Id).ProductStock.Stock;
                     productsWithPriceStock.Add(new ProductsPriceStockModel
                     {
-                        Product = await _context.GetProductAsync(t.ProductStock.ProductId),
-                        Price = t.Price.ProductPrice,
-                        Stock = t.ProductStock.Stock
+                        Product = t,
+                        Price = objectResult.FirstOrDefault(or => or.ProductStock.ProductId == t.Id).Price.ProductPrice,
+                        Stock = stock
                     });
+                }
             }
             else
                 productsWithPriceStock.AddRange(products.Select(p => new ProductsPriceStockModel { Product = p, Price = null, Stock = null }));
@@ -70,89 +90,48 @@ namespace ThAmCo.Products.Controllers
                 CategoryId = CategoryId
             };
 
-            ViewData["BrandList"] = new SelectList(_context.GetBrandsAsync().Result, "Id", "Name");
-            ViewData["CategoryList"] = new SelectList(_context.GetCategoriesAsync().Result, "Id", "Name");
+            var selectListBrands = new List<Brand> { new Brand { Id = 0, Name = "All Brands" } };
+            selectListBrands.AddRange(await _context.GetBrandsAsync());
+            var selectListCategories = new List<Category> { new Category { Id = 0, Name = "All Categories" } };
+            selectListCategories.AddRange(await _context.GetCategoriesAsync());
+
+            ViewData["BrandList"] = new SelectList(selectListBrands, "Id", "Name");
+            ViewData["CategoryList"] = new SelectList(selectListCategories, "Id", "Name");
 
             return View(productIndex);
         }
 
         // GET: Products/Details/5
-        public async Task<IActionResult> Details(int? id)
+        public async Task<IActionResult> Details(int id)
         {
-            if (id == null)
+            if (id <= 0)
                 return NotFound();
 
-            var product = await _context.GetProductAsync(id ?? 0);
+            var product = await _context.GetProductAsync(id);
 
             if (product == null)
                 return NotFound();
 
-            return View(product);
-        }
+            var client = GetHttpClient("ReviewRequest");
+            client.DefaultRequestHeaders.Accept.ParseAdd("application/json");
 
-        // GET: Products/Create
-        public IActionResult Create()
-        {
-            return View();
-        }
-
-        // POST: Products/Create
-        // To protect from overposting attacks, please enable the specific properties you want to bind to, for 
-        // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,Name,Description,Active")] Product product)
-        {
-            if (ModelState.IsValid)
+            var objectResult = new List<ReviewDto>();
+            HttpResponseMessage response = null;
+            try
             {
-                _context.AddProductAsync(product);
-                return RedirectToAction(nameof(Index));
+                response = await client.GetAsync("https://localhost:44367/reviews/GetReviewProduct?prodid=" + id);
             }
-            return View(product);
-        }
-
-        // GET: Products/Edit/5
-        public async Task<IActionResult> Edit(int? id)
-        {
-            if (id == null)
-                return NotFound();
-
-            var product = await _context.GetProductAsync(id ?? 0);
-
-            if (product == null)
-                return NotFound();
-
-            return View(product);
-        }
-
-        // POST: Products/Edit/5
-        // To protect from overposting attacks, please enable the specific properties you want to bind to, for 
-        // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,Name,Description,Active")] Product product)
-        {
-            throw new NotImplementedException();
-            /*if (id != product.Id)
-                return NotFound();
-
-            if (ModelState.IsValid)
+            catch
             {
-                try
-                {
-                    _context.Update(product);
-                    await _context.SaveChangesAsync();
-                }
-                catch (DbUpdateConcurrencyException)
-                {
-                    if (!ProductExists(product.Id))
-                        return NotFound();
-                    else
-                        throw;
-                }
-                return RedirectToAction(nameof(Index));
+
             }
-            return View(product);*/
+            
+            if (response != null && response.IsSuccessStatusCode)
+            {
+                objectResult = await response.Content.ReadAsAsync<List<ReviewDto>>();
+            }
+
+            return View(new DetailsWithReviewsModelcs { Product = product, Reviews = objectResult });
         }
 
         // GET: Products/Delete/5
@@ -170,6 +149,7 @@ namespace ThAmCo.Products.Controllers
         }
 
         // POST: Products/Delete/5
+        [Authorize]
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)

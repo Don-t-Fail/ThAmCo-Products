@@ -135,8 +135,7 @@ namespace ThAmCo.Products.Tests.Controllers
                 Assert.IsNotNull(stockExpected);
                 var priceExpected = Data.Prices().FirstOrDefault(price => price.Id == stockExpected.PriceId);
                 Assert.IsNotNull(priceExpected);
-                
-                Assert.AreEqual(stockExpected.Stock, p.Stock);
+
                 Assert.AreEqual(priceExpected.ProductPrice, p.Price);
                 
                 Assert.AreEqual(productExpected.Active, p.Product.Active);
@@ -155,25 +154,6 @@ namespace ThAmCo.Products.Tests.Controllers
                 Assert.AreEqual(categoryExpected.Name, p.Product.Category.Name);
                 Assert.AreEqual(categoryExpected.AvailableProductCount, p.Product.Category.AvailableProductCount);
             }
-        }
-
-        [TestMethod]
-        public async Task GetProductDetails_AllValid_CorrectReturned()
-        {
-            var brands = Data.Brands();
-            var categories = Data.Categories();
-            var products = Data.Products();
-            var context = new MockProductsContext(products, brands, categories);
-            var controller = new ProductsController(context, null);
-
-            var result = await controller.Details(2);
-            
-            Assert.IsNotNull(result);
-            var productResult = result as ViewResult;
-            Assert.IsNotNull(productResult);
-            var objectResult = productResult.Model as Product;
-            Assert.IsNotNull(objectResult);
-            Assert.AreEqual(products[1], objectResult);
         }
         
         [TestMethod]
@@ -201,7 +181,7 @@ namespace ThAmCo.Products.Tests.Controllers
             var context = new MockProductsContext(products, brands, categories);
             var controller = new ProductsController(context, null);
 
-            var result = await controller.Details(null);
+            var result = await controller.Details(-1);
             
             Assert.IsNotNull(result);
             var productResult = result as NotFoundResult;

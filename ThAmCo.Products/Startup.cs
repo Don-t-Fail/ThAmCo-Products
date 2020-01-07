@@ -1,5 +1,8 @@
 ﻿using System;
+using System.IO;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -44,6 +47,27 @@ namespace ThAmCo.Products
                 .AddTransientHttpErrorPolicy(p =>
                     p.CircuitBreakerAsync(5, TimeSpan.FromSeconds(30)));
 
+            services.AddHttpClient("ReviewRequest")
+                .AddTransientHttpErrorPolicy(p =>
+                    p.OrResult(msg => msg.StatusCode == System.Net.HttpStatusCode.NotFound)
+                        .WaitAndRetryAsync(1, retryAttempt => TimeSpan.FromSeconds(2)));
+
+            services.AddAuthorization(options =>
+            {
+                options.AddPolicy("StaffOnly", builder =>
+                {
+                    builder.RequireClaim("role", "Staff");
+                });
+            });
+
+            services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+                .AddCookie(CookieAuthenticationDefaults.AuthenticationScheme,
+                    options =>
+                    {
+                        options.LoginPath = new PathString("/account/login");
+                        options.AccessDeniedPath = new PathString("/account/AccessDenied");
+                    });
+
             services.AddScoped<IProductsContext, ProductsContext>();
         }
 
@@ -65,11 +89,13 @@ namespace ThAmCo.Products
             app.UseStaticFiles();
             app.UseCookiePolicy();
 
+            app.UseAuthentication();
+
             app.UseMvc(routes =>
             {
                 routes.MapRoute(
                     name: "default",
-                    template: "{controller=Home}/{action=Index}/{id?}");
+                    template: "{controller=Products}/{action=Index}");
             });
         }
     }
