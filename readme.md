@@ -22,6 +22,8 @@ The main branch is `Master`, and should only be committed to/pushed to when the 
 ### Solo Development Plan
 
 ### Peer Point Distribution
+Dylan: 7  
+Steven: 6
 
 ## System Implementation
 ### Security Topics
@@ -74,3 +76,5 @@ This should produce a docker image that can then be launched.
 ### Component Demonstration
 
 ### Peer Point Distribution
+Steven: 7  
+Dylan: 6
