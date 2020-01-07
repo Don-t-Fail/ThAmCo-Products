@@ -87,12 +87,21 @@ namespace ThAmCo.Products.Controllers
             if (product == null)
                 return NotFound();
 
-            var client = GetHttpClient("StandardRequest");
+            var client = GetHttpClient("ReviewRequest");
             client.DefaultRequestHeaders.Accept.ParseAdd("application/json");
 
             var objectResult = new List<ReviewDto>();
-            var response = await client.GetAsync("https://localhost:44367/reviews/GetReviewProduct?prodid=" + id);
-            if (response.IsSuccessStatusCode)
+            HttpResponseMessage response = null;
+            try
+            {
+                response = await client.GetAsync("https://localhost:44367/reviews/GetReviewProduct?prodid=" + id);
+            }
+            catch
+            {
+
+            }
+            
+            if (response != null && response.IsSuccessStatusCode)
             {
                 objectResult = await response.Content.ReadAsAsync<List<ReviewDto>>();
             }
