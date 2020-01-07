@@ -201,7 +201,7 @@ namespace ThAmCo.Products.Tests.Controllers
             var context = new MockProductsContext(products, brands, categories);
             var controller = new ProductsController(context, null);
 
-            var result = await controller.Details(null);
+            var result = await controller.Details(-1);
             
             Assert.IsNotNull(result);
             var productResult = result as NotFoundResult;
