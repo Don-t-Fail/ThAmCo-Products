@@ -47,6 +47,11 @@ namespace ThAmCo.Products
                 .AddTransientHttpErrorPolicy(p =>
                     p.CircuitBreakerAsync(5, TimeSpan.FromSeconds(30)));
 
+            services.AddHttpClient("ReviewRequest")
+                .AddTransientHttpErrorPolicy(p =>
+                    p.OrResult(msg => msg.StatusCode == System.Net.HttpStatusCode.NotFound)
+                        .WaitAndRetryAsync(1, retryAttempt => TimeSpan.FromSeconds(2)));
+
             services.AddAuthorization(options =>
             {
                 options.AddPolicy("StaffOnly", builder =>
@@ -90,7 +95,7 @@ namespace ThAmCo.Products
             {
                 routes.MapRoute(
                     name: "default",
-                    template: "{controller=Home}/{action=Index}/{id?}");
+                    template: "{controller=Products}/{action=Index}");
             });
         }
     }

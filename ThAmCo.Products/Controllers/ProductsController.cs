@@ -36,9 +36,9 @@ namespace ThAmCo.Products.Controllers
             if (CategoryId != 0)
                 products = products.Where(p => p.CategoryId == CategoryId).ToList();
 
-            if (Name != null)
+            if (!String.IsNullOrEmpty(Name))
                 products = products.Where(p => p.Name.Contains(Name)).ToList();
-            if (Description != null)
+            if (!String.IsNullOrEmpty(Description))
                 products = products.Where(p => p.Description.Contains(Description)).ToList();
 
             var productsWithPriceStock = new List<ProductsPriceStockModel>();
@@ -46,7 +46,7 @@ namespace ThAmCo.Products.Controllers
             var client = GetHttpClient("StandardRequest");
             client.DefaultRequestHeaders.Accept.ParseAdd("application/json");
 
-            var response = await client.GetAsync("https://localhost:44385/stock/");
+            var response = await client.GetAsync("https://localhost:44385/stock/ProductStocks");
             if (response.IsSuccessStatusCode)
             {
                 var objectResult = await response.Content.ReadAsAsync<List<MultipleStockDTO>>();
@@ -77,17 +77,36 @@ namespace ThAmCo.Products.Controllers
         }
 
         // GET: Products/Details/5
-        public async Task<IActionResult> Details(int? id)
+        public async Task<IActionResult> Details(int id)
         {
-            if (id == null)
+            if (id <= 0)
                 return NotFound();
 
-            var product = await _context.GetProductAsync(id ?? 0);
+            var product = await _context.GetProductAsync(id);
 
             if (product == null)
                 return NotFound();
 
-            return View(product);
+            var client = GetHttpClient("ReviewRequest");
+            client.DefaultRequestHeaders.Accept.ParseAdd("application/json");
+
+            var objectResult = new List<ReviewDto>();
+            HttpResponseMessage response = null;
+            try
+            {
+                response = await client.GetAsync("https://localhost:44367/reviews/GetReviewProduct?prodid=" + id);
+            }
+            catch
+            {
+
+            }
+            
+            if (response != null && response.IsSuccessStatusCode)
+            {
+                objectResult = await response.Content.ReadAsAsync<List<ReviewDto>>();
+            }
+
+            return View(new DetailsWithReviewsModelcs { Product = product, Reviews = objectResult });
         }
 
         // GET: Products/Create
