@@ -77,17 +77,27 @@ namespace ThAmCo.Products.Controllers
         }
 
         // GET: Products/Details/5
-        public async Task<IActionResult> Details(int? id)
+        public async Task<IActionResult> Details(int id)
         {
-            if (id == null)
+            if (id <= 0)
                 return NotFound();
 
-            var product = await _context.GetProductAsync(id ?? 0);
+            var product = await _context.GetProductAsync(id);
 
             if (product == null)
                 return NotFound();
 
-            return View(product);
+            var client = GetHttpClient("StandardRequest");
+            client.DefaultRequestHeaders.Accept.ParseAdd("application/json");
+
+            var objectResult = new List<ReviewDto>();
+            var response = await client.GetAsync("https://localhost:44367/reviews/GetReviewProduct?prodid=" + id);
+            if (response.IsSuccessStatusCode)
+            {
+                objectResult = await response.Content.ReadAsAsync<List<ReviewDto>>();
+            }
+
+            return View(new DetailsWithReviewsModelcs { Product = product, Reviews = objectResult });
         }
 
         // GET: Products/Create
