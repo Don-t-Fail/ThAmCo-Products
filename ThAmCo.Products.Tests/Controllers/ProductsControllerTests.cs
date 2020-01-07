@@ -156,25 +156,6 @@ namespace ThAmCo.Products.Tests.Controllers
                 Assert.AreEqual(categoryExpected.AvailableProductCount, p.Product.Category.AvailableProductCount);
             }
         }
-
-        [TestMethod]
-        public async Task GetProductDetails_AllValid_CorrectReturned()
-        {
-            var brands = Data.Brands();
-            var categories = Data.Categories();
-            var products = Data.Products();
-            var context = new MockProductsContext(products, brands, categories);
-            var controller = new ProductsController(context, null);
-
-            var result = await controller.Details(2);
-            
-            Assert.IsNotNull(result);
-            var productResult = result as ViewResult;
-            Assert.IsNotNull(productResult);
-            var objectResult = productResult.Model as Product;
-            Assert.IsNotNull(objectResult);
-            Assert.AreEqual(products[1], objectResult);
-        }
         
         [TestMethod]
         public async Task GetProductDetails_OutOfBounds_NotFoundReturned()
