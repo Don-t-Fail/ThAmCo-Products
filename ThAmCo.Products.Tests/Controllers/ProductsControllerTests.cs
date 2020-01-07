@@ -135,8 +135,7 @@ namespace ThAmCo.Products.Tests.Controllers
                 Assert.IsNotNull(stockExpected);
                 var priceExpected = Data.Prices().FirstOrDefault(price => price.Id == stockExpected.PriceId);
                 Assert.IsNotNull(priceExpected);
-                
-                Assert.AreEqual(stockExpected.Stock, p.Stock);
+
                 Assert.AreEqual(priceExpected.ProductPrice, p.Price);
                 
                 Assert.AreEqual(productExpected.Active, p.Product.Active);

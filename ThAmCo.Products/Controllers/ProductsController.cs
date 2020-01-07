@@ -33,8 +33,16 @@ namespace ThAmCo.Products.Controllers
         [AllowAnonymous]
         public async Task<IActionResult> Index(double? PriceLow, double? PriceHigh, string Name, string Description, int BrandId = 0, int CategoryId = 0)
         {
-            var authentication = await HttpContext.AuthenticateAsync();
-            var authenticated = authentication.Succeeded;
+            var authenticated = false;
+
+            try
+            {
+                var authentication = await HttpContext.AuthenticateAsync();
+                authenticated = authentication.Succeeded;
+            }
+            catch
+            {
+            }
 
             var products = await _context.GetAllActive();
 
