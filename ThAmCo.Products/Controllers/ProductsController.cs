@@ -5,6 +5,7 @@ using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using ThAmCo.Products.Data;
@@ -17,7 +18,7 @@ namespace ThAmCo.Products.Controllers
     public class ProductsController : Controller
     {
         private readonly IProductsContext _context;
-        private readonly IHttpClientFactory _clientFactory;
+        private readonly IHttpClientFactory _clientFactory; 
 
         public HttpClient HttpClient { get; set; }
 
@@ -29,8 +30,12 @@ namespace ThAmCo.Products.Controllers
 
         // GET: Products
         //Auth here?
+        [AllowAnonymous]
         public async Task<IActionResult> Index(double? PriceLow, double? PriceHigh, string Name, string Description, int BrandId = 0, int CategoryId = 0)
         {
+            var authentication = await HttpContext.AuthenticateAsync();
+            var authenticated = authentication.Succeeded;
+
             var products = await _context.GetAllActive();
 
             if (BrandId != 0)
@@ -39,7 +44,7 @@ namespace ThAmCo.Products.Controllers
                 products = products.Where(p => p.CategoryId == CategoryId).ToList();
 
             if (!String.IsNullOrEmpty(Name))
-                products = products.Where(p => p.Name.Contains(Name)).ToList();
+                products = products.Where(p => p.Name.ToLower().Contains(Name.ToLower())).ToList();
             if (!String.IsNullOrEmpty(Description))
                 products = products.Where(p => p.Description.Contains(Description)).ToList();
 
@@ -52,13 +57,18 @@ namespace ThAmCo.Products.Controllers
             if (response.IsSuccessStatusCode)
             {
                 var objectResult = await response.Content.ReadAsAsync<List<MultipleStockDTO>>();
-                foreach (var t in objectResult)
+                foreach (var t in products)
+                {
+                    int? stock = null;
+                    if (authenticated)
+                        stock = objectResult.FirstOrDefault(or => or.ProductStock.ProductId == t.Id).ProductStock.Stock;
                     productsWithPriceStock.Add(new ProductsPriceStockModel
                     {
-                        Product = await _context.GetProductAsync(t.ProductStock.ProductId),
-                        Price = t.Price.ProductPrice,
-                        Stock = t.ProductStock.Stock
+                        Product = t,
+                        Price = objectResult.FirstOrDefault(or => or.ProductStock.ProductId == t.Id).Price.ProductPrice,
+                        Stock = stock
                     });
+                }
             }
             else
                 productsWithPriceStock.AddRange(products.Select(p => new ProductsPriceStockModel { Product = p, Price = null, Stock = null }));
@@ -72,8 +82,13 @@ namespace ThAmCo.Products.Controllers
                 CategoryId = CategoryId
             };
 
-            ViewData["BrandList"] = new SelectList(_context.GetBrandsAsync().Result, "Id", "Name");
-            ViewData["CategoryList"] = new SelectList(_context.GetCategoriesAsync().Result, "Id", "Name");
+            var selectListBrands = new List<Brand> { new Brand { Id = 0, Name = "All Brands" } };
+            selectListBrands.AddRange(await _context.GetBrandsAsync());
+            var selectListCategories = new List<Category> { new Category { Id = 0, Name = "All Categories" } };
+            selectListCategories.AddRange(await _context.GetCategoriesAsync());
+
+            ViewData["BrandList"] = new SelectList(selectListBrands, "Id", "Name");
+            ViewData["CategoryList"] = new SelectList(selectListCategories, "Id", "Name");
 
             return View(productIndex);
         }
