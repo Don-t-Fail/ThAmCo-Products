@@ -15,11 +15,6 @@ The main branch is `Master`, and should only be committed to/pushed to when the 
 
 # Assignment Checklist
 ## System Architecture 
-### Original Architecture Diagram with Feedback
-
-### Updated Architecture Diagram with Comments
-
-### Solo Development Plan
 
 ### Peer Point Distribution
 Dylan: 7  
@@ -70,10 +65,7 @@ docker build thamco-products .
 This should produce a docker image that can then be launched.  
 `Docker-compose` would also be used when all services are available with their dockerfile. This would be the ideal way of deploying all services at once, along with their database.
 
-### Deployment Video
-
 ## System Demonstration
-### Component Demonstration
 
 ### Peer Point Distribution
 Steven: 7  
